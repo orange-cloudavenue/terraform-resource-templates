@@ -13,7 +13,7 @@ import (
 
 // TODO : Comment or uncomment the following imports if you are using resources or/and datasources
 
-// Unit test for the schema of the resource cloudavenue_{{ .PackageName }}_{{ .CamelName }}
+// Unit test for the schema of the resource cloudavenue_{{ .FullSnakeResourceName }}
 func Test{{ .CamelName }}ResourceSchema(t *testing.T) {
 	t.Parallel()
 
@@ -35,7 +35,7 @@ func Test{{ .CamelName }}ResourceSchema(t *testing.T) {
 	}
 }
 
-// Unit test for the schema of the datasource cloudavenue_{{ .PackageName }}_{{ .CamelName }}
+// Unit test for the schema of the datasource cloudavenue_{{ .FullSnakeResourceName }}
 /*
 func Test{{ .CamelName }}DataSourceSchema(t *testing.T) {
 	t.Parallel()

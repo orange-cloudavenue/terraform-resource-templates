@@ -1,9 +1,22 @@
 package {{ .PackageName }}
 
 import (
-	supertypes "github.com/FrangipaneTeam/terraform-plugin-framework-supertypes"
+	supertypes "github.com/orange-cloudavenue/terraform-plugin-framework-supertypes"
+
+	"github.com/orange-cloudavenue/terraform-provider-cloudavenue/pkg/utils"
 )
 
-type {{ .CamelName }}Model struct {
-	ID supertypes.StringValue `tfsdk:"id"`
+type (
+	{{ .CamelName }}Model struct {
+		ID supertypes.StringValue `tfsdk:"id"`
+	}
+)
+
+func (rm *{{ .CamelName }}Model) Copy() *{{ .CamelName }}Model {
+	x := &{{ .CamelName }}Model{}
+	utils.ModelCopy(rm, x)
+	return x
 }
+
+// ToSDK{{ .CamelName }}GroupModel converts the model to the SDK model.
+//func (rm *{{ .CamelName }}Model) ToSDK{{ .CamelName }}Model(ctx context.Context) (*v1.FirewallGroup{{ .CamelName }}Model, diag.Diagnostics) {}

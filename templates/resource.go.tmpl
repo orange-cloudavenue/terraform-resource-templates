@@ -43,11 +43,6 @@ type {{ .CamelName }}Resource struct {
 	{{ end }}
 }
 
-// If the resource don't have same schema/structure as the data source, you can use the following code:
-// type {{ .CamelName }}ResourceModel struct {
-// 	ID types.String `tfsdk:"id"`
-// }
-
 // Init Initializes the resource.
 func (r *{{ .CamelName }}Resource) Init(ctx context.Context, rm *{{ .CamelName }}Model) (diags diag.Diagnostics) {
 	{{ if eq .CategoryName "s3" }}
@@ -121,7 +116,11 @@ func (r *{{ .CamelName }}Resource) Create(ctx context.Context, req resource.Crea
 	*/
 
 	// Use generic read function to refresh the state
-	state, _, d := r.read(ctx, plan)
+	state, found, d := r.read(ctx, plan)
+	if !found {
+		resp.Diagnostics.AddError("Resource not found", "The resource was not found after creation")
+		return
+	}
 	if d.HasError() {
 		resp.Diagnostics.Append(d...)
 		return
@@ -152,6 +151,7 @@ func (r *{{ .CamelName }}Resource) Read(ctx context.Context, req resource.ReadRe
  	// Refresh the state
 	stateRefreshed, found, d := r.read(ctx, state)
 	if !found {
+		resp.Diagnostics.AddError("Resource not found", "The resource was not found after refresh")
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -191,7 +191,11 @@ func (r *{{ .CamelName }}Resource) Update(ctx context.Context, req resource.Upda
 	*/
 
 	// Use generic read function to refresh the state
-	stateRefreshed, _, d := r.read(ctx, plan)
+	stateRefreshed, found, d := r.read(ctx, plan)
+	if !found {
+		resp.Diagnostics.AddError("Resource not found", "The resource was not found after update")
+		return
+	}
 	if d.HasError() {
 		resp.Diagnostics.Append(d...)
 		return
@@ -241,8 +245,27 @@ func (r *{{ .CamelName }}Resource) ImportState(ctx context.Context, req resource
 	// 	return
 	// }
 
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("xx"), var1)...)
-	// resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("xx"), var2)...)
+	// x := &{{ .CamelName }}Model{
+	// 	ID: supertypes.NewStringNull(),
+	// }
+
+	// resp.Diagnostics.Append(r.Init(ctx, x)...)
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
+
+	// stateRefreshed, found, d := r.read(ctx, x)
+	// if !found {
+	// 	resp.State.RemoveResource(ctx)
+	// 	return
+	// }
+	// if d.HasError() {
+	// 	resp.Diagnostics.Append(d...)
+	// 	return
+	// }
+
+	// // Set refreshed state
+	// resp.Diagnostics.Append(resp.State.Set(ctx, stateRefreshed)...)
 }
 
 
@@ -250,9 +273,7 @@ func (r *{{ .CamelName }}Resource) ImportState(ctx context.Context, req resource
 
 // read is a generic read function that can be used by the resource Create, Read and Update functions.
 func (r *{{ .CamelName }}Resource) read(ctx context.Context, planOrState *{{ .CamelName }}Model) (stateRefreshed *{{ .CamelName }}Model, found bool, diags diag.Diagnostics) {
-	// TODO : Remove the comment line after you have run the types generator
-	// stateRefreshed is commented because the Copy function is not before run the types generator
-	// stateRefreshed = planOrState.Copy()
+	stateRefreshed = planOrState.Copy()
 
 	/* 
 		Implement the resource read here
