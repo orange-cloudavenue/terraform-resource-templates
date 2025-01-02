@@ -110,7 +110,42 @@ func main() {
 	log.Info().Msgf("categoryName : %s", categoryName)
 	log.Info().Msgf("resourceName : %s", resourceName)
 
-	t := genTemplateConf(categoryName, resourceName, packageName, testDir, *fileName, schemaDir)
+	templateDocDir := filepath.Join(absPath, "../../../../templates/")
+	dir, err = os.Stat(templateDocDir)
+	if err != nil || !dir.IsDir() {
+		log.Info().Msgf("creating directory %s", templateDocDir)
+		// create the directory
+		if err := os.MkdirAll(templateDocDir, 0o755); err != nil {
+			log.Fatal().Err(err).Msgf("error creating directory %s", templateDocDir)
+		}
+	}
+
+	examplesDir := filepath.Join(absPath, "../../../../examples/")
+	dir, err = os.Stat(examplesDir)
+	if err != nil || !dir.IsDir() {
+		log.Info().Msgf("creating directory %s", templateDocDir)
+		// create the directory
+		if err := os.MkdirAll(templateDocDir, 0o755); err != nil {
+			log.Fatal().Err(err).Msgf("error creating directory %s", templateDocDir)
+		}
+	}
+
+	ressOrData := "resources" //nolint:goconst
+	if strings.Contains(*fileName, "datasource") {
+		ressOrData = "data-sources" //nolint:goconst
+	}
+
+	examplesDirSubDir := filepath.Join(examplesDir, ressOrData, "cloudavenue_"+packageName+"_"+resourceName)
+	subDir, err := os.Stat(examplesDirSubDir)
+	if err != nil || !subDir.IsDir() {
+		log.Info().Msgf("creating directory %s", examplesDirSubDir)
+		// create the directory
+		if err := os.MkdirAll(examplesDirSubDir, 0o755); err != nil {
+			log.Fatal().Err(err).Msgf("error creating directory %s", examplesDirSubDir)
+		}
+	}
+
+	t := genTemplateConf(categoryName, resourceName, packageName, testDir, *fileName, schemaDir, templateDocDir, examplesDir)
 	if err := t.createTemplateFiles(tfTypes); err != nil {
 		log.Fatal().Err(err).Msg("error creating file")
 	}

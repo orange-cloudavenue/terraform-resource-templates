@@ -25,8 +25,11 @@ type templateDef struct {
 	Filename              string
 	TestDir               string
 	SchemaDir             string
+	TemplateDocDir        string
+	ExamplesDir           string
 	FullSnakeResourceName string
 	FullCamelResourceName string
+	IsResource            bool
 }
 
 //go:embed templates/datasource.go.tmpl
@@ -56,7 +59,19 @@ var templateTypes string
 //go:embed templates/common_templates.go.tmpl
 var templateCommonTemplates string
 
-func genTemplateConf(categoryName, resourceName, packageName, testDir, fileName, schemaDir string) templateDef {
+//go:embed templates/doc_resource.md.tmpl
+var templateDocResource string
+
+//go:embed templates/resource.tf.tmpl
+var templateResourceTf string
+
+//go:embed templates/datasource.tf.tmpl
+var templateDataSourceTf string
+
+//go:embed templates/import.sh.tmpl
+var templateImportSh string
+
+func genTemplateConf(categoryName, resourceName, packageName, testDir, fileName, schemaDir, templateDocDir, examplesDir string) templateDef {
 	t := templateDef{
 		CategoryName:          categoryName,
 		ResourceName:          resourceName,
@@ -67,8 +82,11 @@ func genTemplateConf(categoryName, resourceName, packageName, testDir, fileName,
 		Filename:              fileName,
 		TestDir:               testDir,
 		SchemaDir:             schemaDir,
+		TemplateDocDir:        templateDocDir,
+		ExamplesDir:           examplesDir,
 		FullSnakeResourceName: categoryName + "_" + strcase.ToSnake(resourceName),
 		FullCamelResourceName: categoryName + "_" + strcase.ToCamel(resourceName),
+		IsResource:            strings.Contains(fileName, "_resource"),
 	}
 
 	if resourceName == "" {
@@ -125,6 +143,58 @@ func (t templateDef) createTemplateFiles(tfTypes string) error {
 		return err
 	}
 
+	// * TemplateDocDir/<resources|data-sources>/<packageName>_<resource_name>.md.tmpl
+	// if file not already exists create it
+	if err := createFileIfNotExists(
+		func() string {
+			ressOrData := "resources"
+			if !t.IsResource {
+				ressOrData = "data-sources"
+			}
+
+			return t.TemplateDocDir + "/" + ressOrData + "/" + t.PackageName + "_" + t.SnakeName + ".md.tmpl"
+		}(),
+		templateDocResource); err != nil {
+		return err
+	}
+
+	// * ExamplesDir/<resources|data-sources>/<resource_name>/resource.tf
+	// if file not already exists create it
+	if err := createTemplateIfNotExists(
+		t,
+		func() string {
+			ressOrData := "resources"
+			ressOrDataFile := "resource.tf"
+			if !t.IsResource {
+				ressOrData = "data-sources"
+				ressOrDataFile = "data-source.tf"
+			}
+
+			return t.ExamplesDir + "/" + ressOrData + "/cloudavenue_" + t.FullSnakeResourceName + "/" + ressOrDataFile
+		}(),
+		func() string {
+			ressOrDataTemplate := templateResourceTf
+			if !t.IsResource {
+				ressOrDataTemplate = templateDataSourceTf
+			}
+			return templateCommonTemplates + ressOrDataTemplate
+		}(),
+	); err != nil {
+		return err
+	}
+
+	// * ExamplesDir/resources/<resource_name>/import.sh
+	// if is resource and file not already exists create it
+	if t.IsResource {
+		if err := createTemplateIfNotExists(
+			t,
+			t.ExamplesDir+"/resources/cloudavenue_"+t.FullSnakeResourceName+"/import.sh",
+			templateCommonTemplates+templateImportSh,
+		); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -150,6 +220,15 @@ func createTemplateIfNotExists(t templateDef, fileName, templateString string) e
 	return nil
 }
 
+// createFileIfNotExists creates the file if it does not exist.
+func createFileIfNotExists(fileName, content string) error {
+	if !file.IsFileExists(fileName) {
+		return createFile(fileName, content)
+	}
+
+	return nil
+}
+
 // createTemplate creates the template file.
 func createTemplate(t templateDef, fileName, templateString string) error {
 	var tplTypes bytes.Buffer
@@ -164,4 +243,9 @@ func createTemplate(t templateDef, fileName, templateString string) error {
 
 	// 0o600 syntax https://stackoverflow.com/questions/5624359/write-file-with-specific-permissions-in-python/5624691#5624691
 	return os.WriteFile(fileName, tplTypes.Bytes(), 0o600)
+}
+
+// createFile creates the file.
+func createFile(fileName, content string) error {
+	return os.WriteFile(fileName, []byte(content), 0o600)
 }

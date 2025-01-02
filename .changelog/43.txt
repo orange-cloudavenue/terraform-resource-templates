@@ -1,0 +1,3 @@
+```release-note:feature
+`template` - Add templates for doc and example.
+```
