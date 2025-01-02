@@ -12,8 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 
-	"github.com/orange-cloudavenue/terraform-provider-resource-templates/internal/terraform"
-	"github.com/orange-cloudavenue/terraform-provider-resource-templates/pkg/file"
+	"github.com/orange-cloudavenue/terraform-resource-templates/internal/terraform"
+	"github.com/orange-cloudavenue/terraform-resource-templates/pkg/file"
 
 	_ "embed"
 )

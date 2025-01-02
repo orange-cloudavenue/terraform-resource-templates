@@ -9,7 +9,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 
-	"github.com/orange-cloudavenue/terraform-provider-resource-templates/pkg/file"
+	"github.com/orange-cloudavenue/terraform-resource-templates/pkg/file"
 
 	_ "embed"
 )

@@ -1,4 +1,4 @@
-module github.com/orange-cloudavenue/terraform-provider-resource-templates
+module github.com/orange-cloudavenue/terraform-resource-templates
 
 go 1.22
 
