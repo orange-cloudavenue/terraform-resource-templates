@@ -1,13 +1,13 @@
-# terraform-templates
+# terraform-provider-resource-template
 
-`terraform-templates` is a command-line tool that generates Go code templates for Terraform data sources and resources.
+`terraform-provider-resource-template` is a command-line tool that generates Go code templates for Terraform data sources and resources.
 
 ## Installation
 
-To install `terraform-templates`, use the following command:
+To install `terraform-provider-resource-template`, use the following command:
 
 ```bash
-go install github.com/FrangipaneTeam/terraform-templates@latest
+go install github.com/orange-cloudavenue/terraform-provider-resource-template@latest
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ See below real example.
 You can now generate the file like this :
 
 ```bash
-terraform-templates -filename my_name_datasource.go
+terraform-provider-resource-template -filename my_name_datasource.go
 ```
 
 ### Generating a resource template
