@@ -7,10 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/iancoleman/strcase"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 
 	"github.com/orange-cloudavenue/terraform-resource-templates/internal/terraform"
 	"github.com/orange-cloudavenue/terraform-resource-templates/pkg/file"
@@ -18,10 +16,24 @@ import (
 	_ "embed"
 )
 
+var version = "v0.0.0-dev"
+
 func main() {
 	fileName := flag.String("filename", "", "filename")
+	update := flag.Bool("update", false, "update the program")
 	flag.Parse()
+
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	if *update {
+		err := selfUpdate()
+		if err != nil {
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
+	checkVersion()
 
 	if *fileName == "" {
 		log.Fatal().Msg("filename is required")
@@ -31,36 +43,8 @@ func main() {
 		log.Fatal().Msgf("file %s not found", *fileName)
 	}
 
-	// if .golangci.yml exists, use it
-	if !file.IsFileExists(".golangci.yml") {
-		// read file ../.golangci.yml
-		golangCIFile, err := file.ReadFile(".golangci.yml")
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to read file")
-		}
+	extractVarNaming()
 
-		// parse file ../.golangci.yml
-		golangCI := &golangCI{}
-		if err := yaml.Unmarshal(golangCIFile, golangCI); err != nil {
-			log.Fatal().Err(err).Msg("Failed to parse file")
-		}
-
-		varNaming := make([]string, 0)
-
-		// get all var-naming rules
-		for _, rule := range golangCI.LintersSettings.Revive.Rules {
-			if rule.Name == "var-naming" {
-				for _, arg := range rule.Arguments {
-					varNaming = append(varNaming, arg[0].(string))
-				}
-			}
-		}
-
-		// configure var-naming rules
-		for _, v := range varNaming {
-			strcase.ConfigureAcronym(strings.ToUpper(v), strings.ToLower(v))
-		}
-	}
 	// Get the absolute path of the file
 	absPath, err := filepath.Abs(*fileName)
 	if err != nil {
@@ -157,20 +141,4 @@ func main() {
 	}
 
 	log.Info().Msg("Done")
-}
-
-type golangCI struct {
-	LintersSettings struct {
-		Revive struct {
-			Revive                interface{} `yaml:"revive"`
-			IgnoreGeneratedHeader bool        `yaml:"ignore-generated-header"` //nolint:tagliatelle
-			Severity              string      `yaml:"severity"`
-			Rules                 []struct {
-				Name      string          `yaml:"name"`
-				Severity  string          `yaml:"severity"`
-				Disabled  bool            `yaml:"disabled"`
-				Arguments [][]interface{} `yaml:"arguments,omitempty"`
-			} `yaml:"rules"`
-		} `yaml:"revive"`
-	} `yaml:"linters-settings"` //nolint:tagliatelle
 }

@@ -272,12 +272,15 @@ func (r *{{ .CamelName }}Resource) ImportState(ctx context.Context, req resource
 // * CustomFuncs
 
 // read is a generic read function that can be used by the resource Create, Read and Update functions.
-func (r *{{ .CamelName }}Resource) read(ctx context.Context, planOrState *{{ .CamelName }}Model) (stateRefreshed *{{ .CamelName }}Model, found bool, diags diag.Diagnostics) {
+func (r *{{ .CamelName }}Resource) read(_ context.Context, planOrState *{{ .CamelName }}Model) (stateRefreshed *{{ .CamelName }}Model, found bool, diags diag.Diagnostics) {
 	stateRefreshed = planOrState.Copy()
 
 	/* 
 		Implement the resource read here
 	*/
+
+	// Used for satisfying the linter in the template process
+	diags.AddError("Not implemented", "The read function is not implemented yet")
 
 	/* Example
 	

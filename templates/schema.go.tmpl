@@ -13,11 +13,6 @@ import (
 // ! This is outside import block because golangci-lint remove commented import.
 {{ template "importSchema" . }}
 
-// How to use types generator:
-// 1. Define the schema in the file internal/provider/{{ .CategoryName }}/{{ .SnakeName }}_schema.go
-// 2. Add the resource or data source to the file internal/provider/provider_resources.go or internal/provider/provider_data_sources.go respectively
-// 3. Launch the following command to generate golang structs for the schema:
-// go run ./cmd/types-generator/*.go -file internal/provider/{{ .CategoryName }}/{{ .SnakeName }}_schema.go -resource cloudavenue_{{ .FullSnakeResourceName }} -is-resource
 func {{ .LowerCamelName }}Schema(_ context.Context) superschema.Schema {
 	return superschema.Schema{
 		Resource: superschema.SchemaDetails{
