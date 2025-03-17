@@ -41,5 +41,5 @@ func ToString(filename string) (string, error) {
 
 // ReadFile reads a file and returns its content as a byte array.
 func ReadFile(filename string) ([]byte, error) {
-	return os.ReadFile("../.golangci.yml")
+	return os.ReadFile(filename)
 }
