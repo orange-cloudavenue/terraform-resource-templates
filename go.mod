@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/creativeprojects/go-selfupdate v1.4.1
 	github.com/iancoleman/strcase v0.3.0
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
